@@ -1,0 +1,1 @@
+export default function CouponManagementPage() { return <div className="p-4">Coupon Management Page</div>; }

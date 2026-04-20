@@ -1,0 +1,1 @@
+export default function AddressesPage() { return <div className="p-4">Addresses Page</div>; }
