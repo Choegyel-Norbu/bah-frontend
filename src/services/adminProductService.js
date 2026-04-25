@@ -1,4 +1,5 @@
 import { api } from './api';
+import { toApiSourcingType } from '@/constants/productSourcing';
 
 const ADMIN_PRODUCTS_PATH = '/admin/products';
 
@@ -138,6 +139,7 @@ function getVariantErrorMessage(error) {
  * @returns {Record<string, unknown>}
  */
 function buildProductPayload(body) {
+  const sourcingType = toApiSourcingType(body.sourcingType);
   return {
     name: body.name,
     categoryId: Number(body.categoryId),
@@ -149,6 +151,7 @@ function buildProductPayload(body) {
     slug: body.slug?.trim() || undefined,
     brand: body.brand?.trim() || null,
     material: body.material?.trim() || null,
+    ...(sourcingType ? { sourcingType } : {}),
     ...(Array.isArray(body.variantGroups) && {
       variantGroups: body.variantGroups.map((g) => ({
         color: String(g.color).trim(),
@@ -266,6 +269,10 @@ export async function updateProduct(id, body, imageFilesByIndex = []) {
     if (body.categoryId !== undefined) payload.categoryId = Number(body.categoryId);
     if (body.brand !== undefined) payload.brand = body.brand?.trim() || null;
     if (body.material !== undefined) payload.material = body.material?.trim() || null;
+    if (body.sourcingType !== undefined) {
+      const st = toApiSourcingType(body.sourcingType);
+      if (st) payload.sourcingType = st;
+    }
     if (body.active !== undefined) payload.active = Boolean(body.active);
     else if (body.isActive !== undefined) payload.active = Boolean(body.isActive);
     if (body.featured !== undefined) payload.featured = Boolean(body.featured);

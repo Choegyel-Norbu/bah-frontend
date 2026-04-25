@@ -7,6 +7,10 @@ import { Plus, Trash2, CheckCircle, Package, List, Loader2, Lightbulb } from 'lu
 import { motion, AnimatePresence } from 'framer-motion';
 import * as adminProductService from '@/services/adminProductService';
 import { getCategories, flattenCategories } from '@/services/categoryService';
+import {
+  PRODUCT_SOURCING_OPTIONS,
+  DEFAULT_PRODUCT_SOURCING_TYPE,
+} from '@/constants/productSourcing';
 
 /** Renders a preview of the selected file and revokes object URL on change/unmount */
 function FilePreview({ file, className = 'h-20 w-20 rounded-lg object-cover' }) {
@@ -44,6 +48,7 @@ const addProductSchema = z.object({
   categoryId: z.coerce.number().int().min(1, 'Category is required'),
   brand: z.string().optional().nullable(),
   material: z.string().optional().nullable(),
+  sourcingType: z.string().min(1, 'Sourcing type is required'),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   isNewArrival: z.boolean().optional(),
@@ -302,6 +307,7 @@ export default function AddProductPage() {
       categoryId: 1,
       brand: '',
       material: '',
+      sourcingType: DEFAULT_PRODUCT_SOURCING_TYPE,
       isActive: true,
       isFeatured: false,
       isNewArrival: false,
@@ -547,6 +553,25 @@ export default function AddProductPage() {
                       </select>
                       {errors.categoryId && (
                         <p className="mt-1 text-xs text-red-500">{errors.categoryId.message}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label htmlFor="add-product-sourcingType" className="block text-xs font-medium uppercase tracking-wider text-secondary">
+                        Sourcing type <span className="text-primary">*</span>
+                      </label>
+                      <select
+                        id="add-product-sourcingType"
+                        className={getInputClassName(errors.sourcingType)}
+                        {...register('sourcingType')}
+                      >
+                        {PRODUCT_SOURCING_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.sourcingType && (
+                        <p className="mt-1 text-xs text-red-500">{errors.sourcingType.message}</p>
                       )}
                     </div>
                   </div>

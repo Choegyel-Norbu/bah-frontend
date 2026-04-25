@@ -20,6 +20,11 @@ import { getProductBySlug } from '@/services/productService';
 import { getCategories, flattenCategoriesWithSlug } from '@/services/categoryService';
 import { getVariantMainImageUrl } from '@/utils/productImages';
 import { useToast } from '@/hooks/useToast';
+import {
+  PRODUCT_SOURCING_OPTIONS,
+  DEFAULT_PRODUCT_SOURCING_TYPE,
+  toApiSourcingType,
+} from '@/constants/productSourcing';
 
 const editProductSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
@@ -28,6 +33,7 @@ const editProductSchema = z.object({
   categoryId: z.coerce.number().int().min(1, 'Category is required'),
   brand: z.string().optional().nullable(),
   material: z.string().optional().nullable(),
+  sourcingType: z.string().min(1, 'Sourcing type is required'),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   isNewArrival: z.boolean().optional(),
@@ -553,6 +559,7 @@ export default function EditProductPage() {
     setValue,
     getValues,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(editProductSchema),
@@ -564,12 +571,16 @@ export default function EditProductPage() {
       categoryId: 1,
       brand: '',
       material: '',
+      sourcingType: DEFAULT_PRODUCT_SOURCING_TYPE,
       isActive: true,
       isFeatured: false,
       isNewArrival: false,
       isTrending: false,
     },
   });
+
+  const sourcingTypeValue = watch('sourcingType');
+  const sourcingTypeInKnownList = PRODUCT_SOURCING_OPTIONS.some((o) => o.value === sourcingTypeValue);
 
   useEffect(() => {
     if (!slug) {
@@ -600,6 +611,7 @@ export default function EditProductPage() {
           categoryId,
           brand: p?.brand ?? '',
           material: p?.material ?? '',
+          sourcingType: toApiSourcingType(p?.sourcingType) ?? DEFAULT_PRODUCT_SOURCING_TYPE,
           isActive: resolveFormIsActive(p, adminListRow),
           isFeatured: Boolean(p?.featured ?? p?.isFeatured),
           isNewArrival: Boolean(p?.newArrival ?? p?.isNewArrival),
@@ -765,6 +777,7 @@ export default function EditProductPage() {
           categoryId: Number(data.categoryId),
           brand: data.brand?.trim() || null,
           material: data.material?.trim() || null,
+          sourcingType: toApiSourcingType(data.sourcingType) ?? DEFAULT_PRODUCT_SOURCING_TYPE,
           isActive: data.isActive !== false,
           isFeatured: Boolean(data.isFeatured),
           isNewArrival: Boolean(data.isNewArrival),
@@ -1138,6 +1151,28 @@ export default function EditProductPage() {
                     </select>
                     {errors.categoryId && (
                       <p className="mt-1 text-xs text-red-500">{errors.categoryId.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="edit-product-sourcingType" className="block text-xs font-medium uppercase tracking-wider text-secondary">
+                      Sourcing type <span className="text-primary">*</span>
+                    </label>
+                    <select
+                      id="edit-product-sourcingType"
+                      className={getInputClassName(errors.sourcingType)}
+                      {...register('sourcingType')}
+                    >
+                      {!sourcingTypeInKnownList && sourcingTypeValue ? (
+                        <option value={sourcingTypeValue}>{sourcingTypeValue}</option>
+                      ) : null}
+                      {PRODUCT_SOURCING_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.sourcingType && (
+                      <p className="mt-1 text-xs text-red-500">{errors.sourcingType.message}</p>
                     )}
                   </div>
                 </div>
